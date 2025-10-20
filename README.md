@@ -1,2 +1,4 @@
-# solana-pay
-Crypto payments app for common people 
+# SolPay
+
+Crypto payments app for common people. 
+
