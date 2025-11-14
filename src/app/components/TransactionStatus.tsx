@@ -26,6 +26,7 @@ export default function TransactionStatus({
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_ENDPOINT || 'https://api.devnet.solana.com';
   const connection = new Connection(RPC_ENDPOINT, 'confirmed');
 
+  // Function to check if payment has been made
   const checkPayment = useCallback(async () => {
     if (!reference) return;
 
@@ -35,7 +36,7 @@ export default function TransactionStatus({
     try {
       console.log(`Checking for transaction... Attempt ${attempts + 1}`);
       
-      // Find transaction with reference
+      // Search for transaction containing our reference key
       const signatureInfo = await findReference(connection, reference, {
         finality: 'confirmed'
       });
@@ -43,7 +44,7 @@ export default function TransactionStatus({
       console.log('Transaction found:', signatureInfo.signature);
       setSignature(signatureInfo.signature);
 
-      // Validate the transfer
+      // Validate the transaction matches our expectations
       try {
         await validateTransfer(
           connection,
@@ -51,7 +52,7 @@ export default function TransactionStatus({
           {
             recipient,
             amount,
-            splToken: undefined,
+            splToken: undefined, // Using native SOL, not SPL token
             reference,
           },
           { commitment: 'confirmed' }
@@ -69,15 +70,15 @@ export default function TransactionStatus({
       }
 
     } catch (error: any) {
-      // Transaction not found yet - this is expected while waiting
+      // FindReferenceError means transaction not found yet (expected while waiting)
       if (error instanceof FindReferenceError) {
         console.log('Transaction not found yet, continuing to poll...');
-        return;
+        return; // Keep polling
       }
 
-      // Other errors
+      // Other errors - actual problems
       console.error('Error checking payment:', error);
-      if (attempts > 60) { // Stop after 60 attempts (2 minutes)
+      if (attempts > 60) { // Stop after 60 attempts (2 minutes with 2-second intervals)
         setError('Payment verification timeout');
         setStatus('error');
         onStatusChange?.('error');
@@ -85,6 +86,7 @@ export default function TransactionStatus({
     }
   }, [reference, connection, amount, recipient, attempts, onStatusChange]);
 
+  // Set up polling when reference changes
   useEffect(() => {
     if (!reference || status === 'confirmed' || status === 'error') {
       return;
@@ -93,13 +95,14 @@ export default function TransactionStatus({
     // Poll every 2 seconds
     const interval = setInterval(checkPayment, 2000);
 
-    // Initial check
+    // Initial check immediately
     checkPayment();
 
-    // Cleanup
+    // Cleanup interval on unmount or when dependencies change
     return () => clearInterval(interval);
   }, [reference, checkPayment, status]);
 
+  // Render different UI based on status
   if (!reference) {
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">

@@ -5,17 +5,17 @@ import { PublicKey } from '@solana/web3.js';
 import { createQR, encodeURL } from '@solana/pay';
 import BigNumber from 'bignumber.js';
 import Image from 'next/image';
-import TransactionStatus from '../components/TransactionStatus';
+import TransactionStatus from '@/components/TransactionStatus';
 
 export default function Home() {
   const [qrCode, setQrCode] = useState<string>('');
   const [reference, setReference] = useState<PublicKey | null>(null);
-  const [amount] = useState(new BigNumber(0.001)); // 0.001 SOL
+  const [amount] = useState(new BigNumber(0.001)); // Default 0.001 SOL for demo
   const [recipient, setRecipient] = useState<PublicKey | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'confirmed' | 'error'>('pending');
 
   useEffect(() => {
-    // Set recipient from environment
+    // Set merchant wallet from environment variables
     const merchantWallet = process.env.NEXT_PUBLIC_MERCHANT_WALLET;
     if (merchantWallet) {
       setRecipient(new PublicKey(merchantWallet));
@@ -24,32 +24,33 @@ export default function Home() {
     generateQRCode();
   }, []);
 
+  // Generates Solana Pay QR code and unique reference for tracking
   const generateQRCode = async () => {
     try {
-      // Create API URL for Solana Pay
+      // API endpoint which creates the transaction
       const apiUrl = `${window.location.protocol}//${window.location.host}/api/pay`;
       const label = 'SolPay Gateway';
       const message = 'Scan to pay with Solana';
-      
-      // Encode URL for Solana Pay
+
+      // Create Solana Pay URL encoding the API endpoint
       const url = encodeURL({ 
         link: new URL(apiUrl), 
         label, 
         message 
       });
-      
+
       console.log('Payment URL:', url.toString());
-      
-      // Create QR code
+
+      // Create QR code image for scanning
       const qr = createQR(url, 300, 'transparent');
       const qrBlob = await qr.getRawData('png');
-      
+
       if (!qrBlob) {
         console.error('Failed to generate QR code');
         return;
       }
-      
-      // Convert to base64 for display
+
+      // Convert binary blob to base64 image string for <Image> display
       const reader = new FileReader();
       reader.onload = (event) => {
         if (typeof event.target?.result === 'string') {
@@ -58,15 +59,16 @@ export default function Home() {
       };
       reader.readAsDataURL(qrBlob);
 
-      // Generate reference for tracking (in production, get this from API)
+      // Generate a unique reference PublicKey client-side for now, ideally from backend
       const newReference = PublicKey.unique();
       setReference(newReference);
-      
+
     } catch (error) {
       console.error('Error generating QR code:', error);
     }
   };
 
+  // Refresh payment, regenerate QR and reset status
   const handleRefresh = () => {
     setPaymentStatus('pending');
     setReference(null);
