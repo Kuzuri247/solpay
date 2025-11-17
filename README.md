@@ -1,6 +1,6 @@
 
 
-# SolPay
+# SolPay (at very basic stage rn due to other work will work on it more)
 
 A decentralized payment solution built on the Solana blockchain, enabling fast and low-cost cryptocurrency transactions.
 
@@ -64,3 +64,4 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 ***
 
 Would you like me to add specific sections like API documentation, architecture details, or testing instructions?
+
