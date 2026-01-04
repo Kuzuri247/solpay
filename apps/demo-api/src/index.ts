@@ -46,8 +46,16 @@ try {
 const solpayMiddleware = createSolpayMiddleware({
   config: {
     recipient: recipientPubkey,
-    rpcUrl: process.env.RPC_URL || "https://api.devnet.solana.com",
-    network: "devnet",
+const rpcUrl = process.env.RPC_URL || "https://api.devnet.solana.com";
+const network = rpcUrl.includes("devnet") ? "devnet" : rpcUrl.includes("testnet") ? "testnet" : "mainnet";
+
+const solpayMiddleware = createSolpayMiddleware({
+  config: {
+    recipient: new PublicKey(process.env.RECIPIENT_WALLET),
+    rpcUrl,
+    network,
+    usdcMint: new PublicKey(process.env.USDC_MINT),
+  },
     usdcMint: usdcMintPubkey,
   },
   routes: [
