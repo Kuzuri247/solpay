@@ -8,17 +8,47 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4021;
 
+// Validate required environment variables exist
 if (!process.env.RECIPIENT_WALLET || !process.env.USDC_MINT) {
-  console.error("Missing required environment variables");
+  console.error("❌ Missing required environment variables: RECIPIENT_WALLET and/or USDC_MINT");
+  process.exit(1);
+}
+
+// Validate RECIPIENT_WALLET format
+let recipientPubkey: PublicKey;
+try {
+  recipientPubkey = new PublicKey(process.env.RECIPIENT_WALLET);
+  if (!PublicKey.isOnCurve(recipientPubkey.toBytes())) {
+    throw new Error('Address is not on the ed25519 curve');
+  }
+} catch (error) {
+  console.error(`❌ Invalid RECIPIENT_WALLET: ${process.env.RECIPIENT_WALLET}`);
+  console.error(`   Error: ${(error as Error).message}`);
+  console.error(`   Please provide a valid Solana public key address`);
+  process.exit(1);
+}
+
+// Validate USDC_MINT format
+let usdcMintPubkey: PublicKey;
+try {
+  usdcMintPubkey = new PublicKey(process.env.USDC_MINT);
+  if (!PublicKey.isOnCurve(usdcMintPubkey.toBytes())) {
+    throw new Error('Address is not on the ed25519 curve');
+  }
+} catch (error) {
+  console.error(`❌ Invalid USDC_MINT: ${process.env.USDC_MINT}`);
+  console.error(`   Error: ${(error as Error).message}`);
+  console.error(`   Expected devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`);
+  console.error(`   Expected mainnet: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`);
   process.exit(1);
 }
 
 const solpayMiddleware = createSolpayMiddleware({
   config: {
-    recipient: new PublicKey(process.env.RECIPIENT_WALLET),
+    recipient: recipientPubkey,
     rpcUrl: process.env.RPC_URL || "https://api.devnet.solana.com",
     network: "devnet",
-    usdcMint: new PublicKey(process.env.USDC_MINT),
+    usdcMint: usdcMintPubkey,
   },
   routes: [
     {
@@ -35,10 +65,10 @@ const solpayMiddleware = createSolpayMiddleware({
     },
   ],
   onPaymentVerified: async (payment) => {
-    console.log("Payment verified:", payment.transactionSignature);
+    console.log("✅ Payment verified:", payment.transactionSignature);
   },
   onPaymentFailed: async (error) => {
-    console.error("Payment failed:", error.message);
+    console.error("❌ Payment failed:", error.message);
   },
 });
 
@@ -90,7 +120,8 @@ app.get("/api/data", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Demo API running on http://localhost:${PORT}`);
-  console.log(`Network: ${process.env.RPC_URL || "devnet"}`);
-  console.log(`Recipient: ${process.env.RECIPIENT_WALLET}`);
+  console.log(`🚀 Demo API running on http://localhost:${PORT}`);
+  console.log(`📡 Network: ${process.env.RPC_URL || "devnet"}`);
+  console.log(`💰 Recipient: ${process.env.RECIPIENT_WALLET}`);
+  console.log(`🪙 USDC Mint: ${process.env.USDC_MINT}`);
 });
