@@ -1,0 +1,20 @@
+{
+  "name": "@solpay/middleware",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@solpay/types": "workspace:*",
+    "@solpay/sdk": "workspace:*",
+    "@solana/web3.js": "^1.95.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "typescript": "^5.7.0"
+  }
+}
