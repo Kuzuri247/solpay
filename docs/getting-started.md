@@ -83,10 +83,8 @@ app.listen(3000, () => {
 });
 ```
 
-### 3. Next.js Integration
-
-```typescript
 // middleware.ts
+import { NextRequest } from 'next/server';
 import { createSolpayNextMiddleware } from "@solpay/middleware";
 import { PublicKey } from "@solana/web3.js";
 
@@ -113,7 +111,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: "/api/:path*",
 };
-```
 
 ## Understanding Price Units
 
