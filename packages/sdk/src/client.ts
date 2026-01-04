@@ -51,7 +51,7 @@ export class SolpayClient {
     }
 
     // Validate network
-    const allowedNetworks = ['mainnet-beta', 'devnet', 'testnet'];
+    const allowedNetworks = ['mainnet-beta', 'devnet'];
     if (!config.network || !allowedNetworks.includes(config.network)) {
       throw new Error(`Invalid config: network must be one of: ${allowedNetworks.join(', ')}`);
     }
