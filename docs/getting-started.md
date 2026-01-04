@@ -30,8 +30,10 @@ Create a `.env` file:
 ```env
 RECIPIENT_WALLET=YOUR_SOLANA_WALLET_ADDRESS
 RPC_URL=https://api.devnet.solana.com
-USDC_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+USDC_MINT=4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
 ```
+
+**Note**: The USDC mint address above is for Solana devnet. For mainnet, use: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
 
 ### 2. Express Integration
 
@@ -56,7 +58,7 @@ const solpay = createSolpayMiddleware({
   routes: [
     {
       path: "/api/premium",
-      price: 1000, // 0.001 USDC
+      price: 1000, // 1000 base units = 0.001 USDC (USDC has 6 decimals)
       scheme: "exact",
       description: "Premium content",
     },
@@ -98,7 +100,7 @@ const solpayMiddleware = createSolpayNextMiddleware({
   routes: [
     {
       path: "/api/premium",
-      price: 1000,
+      price: 1000, // Base units
       scheme: "exact",
     },
   ],
@@ -113,6 +115,16 @@ export const config = {
 };
 ```
 
+## Understanding Price Units
+
+**Important**: All prices in Solpay are specified in base units (smallest denomination).
+
+- **USDC has 6 decimals**: 1 USDC = 1,000,000 base units
+- **Example**: `price: 1000` = 0.001 USDC
+- **Example**: `price: 500` = 0.0005 USDC
+
+This ensures precision and avoids floating-point issues in payment calculations.
+
 ## Payment Flow
 
 ### Client Side
@@ -126,13 +138,13 @@ const client = new SolpayClient({
   recipient: new PublicKey("RECIPIENT_ADDRESS"),
   rpcUrl: "https://api.devnet.solana.com",
   network: "devnet",
-  usdcMint: new PublicKey("USDC_MINT_ADDRESS"),
+  usdcMint: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
 });
 
 // Create payment
 const payment = await client.createPayment(
   {
-    amount: 1000,
+    amount: 1000, // Base units
     currency: "USDC",
     recipient: "RECIPIENT_ADDRESS",
     scheme: "exact",
@@ -167,7 +179,7 @@ interface SolpayMiddlewareOptions {
   };
   routes: Array<{
     path: string;                // Route to protect
-    price: number;               // Price in smallest units
+    price: number;               // Price in base units
     scheme?: "exact" | "channel"; // Payment scheme
     description?: string;        // Human-readable description
     metadata?: Record<string, unknown>;
@@ -223,9 +235,9 @@ Use the SDK to create a payment and include the proof in the `X-Payment` header.
 const solpay = createSolpayMiddleware({
   config: { /* ... */ },
   routes: [
-    { path: "/api/basic", price: 100 },
-    { path: "/api/standard", price: 500 },
-    { path: "/api/premium", price: 1000 },
+    { path: "/api/basic", price: 100 },     // 0.0001 USDC
+    { path: "/api/standard", price: 500 },  // 0.0005 USDC
+    { path: "/api/premium", price: 1000 },  // 0.001 USDC
   ],
 });
 ```
@@ -246,7 +258,7 @@ app.get("/article/:id", solpayMiddleware, async (req, res) => {
 const solpay = createSolpayMiddleware({
   config: { /* ... */ },
   routes: [
-    { path: "/api/llm/query", price: 50 },
+    { path: "/api/llm/query", price: 50 }, // 0.00005 USDC per query
   ],
 });
 ```
@@ -259,6 +271,7 @@ const solpay = createSolpayMiddleware({
 - Verify correct RPC endpoint
 - Ensure sufficient SOL for transaction fees
 - Check wallet has USDC balance
+- Verify using correct USDC mint for network (devnet vs mainnet)
 
 ### 402 Response Always Returned
 

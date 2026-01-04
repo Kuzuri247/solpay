@@ -23,13 +23,13 @@ const solpayMiddleware = createSolpayMiddleware({
   routes: [
     {
       path: "/api/premium",
-      price: 1000,
+      price: 1000, // 1000 base units = 0.001 USDC (6 decimals)
       scheme: "exact",
       description: "Premium content access",
     },
     {
       path: "/api/data",
-      price: 500,
+      price: 500, // 500 base units = 0.0005 USDC (6 decimals)
       scheme: "exact",
       description: "Data API endpoint",
     },
@@ -49,15 +49,16 @@ app.get("/", (req, res) => {
   res.json({
     message: "Solpay x402 Demo API",
     version: "0.1.0",
+    note: "All prices are in base units. For USDC: 1,000,000 base units = 1 USDC",
     endpoints: [
       {
         path: "/api/premium",
-        price: "0.001 USDC",
+        price: "1000 base units (0.001 USDC)",
         description: "Premium content endpoint",
       },
       {
         path: "/api/data",
-        price: "0.0005 USDC",
+        price: "500 base units (0.0005 USDC)",
         description: "Data API endpoint",
       },
     ],
