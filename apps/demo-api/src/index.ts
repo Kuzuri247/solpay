@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 4021;
 
 // Validate required environment variables exist
 if (!process.env.RECIPIENT_WALLET || !process.env.USDC_MINT) {
-  console.error("❌ Missing required environment variables: RECIPIENT_WALLET and/or USDC_MINT");
+  console.error("[ERROR] Missing required environment variables: RECIPIENT_WALLET and/or USDC_MINT");
   process.exit(1);
 }
 
@@ -22,9 +22,9 @@ try {
     throw new Error('Address is not on the ed25519 curve');
   }
 } catch (error) {
-  console.error(`❌ Invalid RECIPIENT_WALLET: ${process.env.RECIPIENT_WALLET}`);
-  console.error(`   Error: ${(error as Error).message}`);
-  console.error(`   Please provide a valid Solana public key address`);
+  console.error(`[ERROR] Invalid RECIPIENT_WALLET: ${process.env.RECIPIENT_WALLET}`);
+  console.error(`        Error: ${(error as Error).message}`);
+  console.error(`        Please provide a valid Solana public key address`);
   process.exit(1);
 }
 
@@ -36,26 +36,18 @@ try {
     throw new Error('Address is not on the ed25519 curve');
   }
 } catch (error) {
-  console.error(`❌ Invalid USDC_MINT: ${process.env.USDC_MINT}`);
-  console.error(`   Error: ${(error as Error).message}`);
-  console.error(`   Expected devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`);
-  console.error(`   Expected mainnet: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`);
+  console.error(`[ERROR] Invalid USDC_MINT: ${process.env.USDC_MINT}`);
+  console.error(`        Error: ${(error as Error).message}`);
+  console.error(`        Expected devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`);
+  console.error(`        Expected mainnet: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`);
   process.exit(1);
 }
 
 const solpayMiddleware = createSolpayMiddleware({
   config: {
     recipient: recipientPubkey,
-const rpcUrl = process.env.RPC_URL || "https://api.devnet.solana.com";
-const network = rpcUrl.includes("devnet") ? "devnet" : rpcUrl.includes("testnet") ? "testnet" : "mainnet";
-
-const solpayMiddleware = createSolpayMiddleware({
-  config: {
-    recipient: new PublicKey(process.env.RECIPIENT_WALLET),
-    rpcUrl,
-    network,
-    usdcMint: new PublicKey(process.env.USDC_MINT),
-  },
+    rpcUrl: process.env.RPC_URL || "https://api.devnet.solana.com",
+    network: "devnet",
     usdcMint: usdcMintPubkey,
   },
   routes: [
@@ -73,10 +65,10 @@ const solpayMiddleware = createSolpayMiddleware({
     },
   ],
   onPaymentVerified: async (payment) => {
-    console.log("✅ Payment verified:", payment.transactionSignature);
+    console.log("[SUCCESS] Payment verified:", payment.transactionSignature);
   },
   onPaymentFailed: async (error) => {
-    console.error("❌ Payment failed:", error.message);
+    console.error("[ERROR] Payment failed:", error.message);
   },
 });
 
@@ -128,8 +120,8 @@ app.get("/api/data", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Demo API running on http://localhost:${PORT}`);
-  console.log(`📡 Network: ${process.env.RPC_URL || "devnet"}`);
-  console.log(`💰 Recipient: ${process.env.RECIPIENT_WALLET}`);
-  console.log(`🪙 USDC Mint: ${process.env.USDC_MINT}`);
+  console.log(`[INFO] Demo API running on http://localhost:${PORT}`);
+  console.log(`[INFO] Network: ${process.env.RPC_URL || "devnet"}`);
+  console.log(`[INFO] Recipient: ${process.env.RECIPIENT_WALLET}`);
+  console.log(`[INFO] USDC Mint: ${process.env.USDC_MINT}`);
 });
