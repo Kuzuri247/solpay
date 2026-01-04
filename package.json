@@ -1,0 +1,32 @@
+{
+  "name": "solpay-x402",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HTTP 402 payment infrastructure for Solana APIs and AI agents",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.7.2",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "keywords": [
+    "solana",
+    "x402",
+    "payments",
+    "micropayments",
+    "http-402",
+    "crypto-payments",
+    "api-monetization"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kuzuri247/solpay.git"
+  },
+  "license": "MIT"
+}
